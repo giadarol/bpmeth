@@ -50,24 +50,24 @@ class Hamiltonian:
 
 
     def solve(self, qp0, s_span=None, ivp_opt=None):
+        ivp_opt = ivp_opt.copy() if ivp_opt is not None else None
         if s_span is None:
             s_span = [0, self.length]
         if ivp_opt is None:
             ivp_opt = {'t_eval': np.linspace(s_span[0], s_span[1], 500), "rtol":1e-4, "atol":1e-7}
         elif 't_eval' not in ivp_opt:
             ivp_opt['t_eval'] = np.linspace(s_span[0], s_span[1], 500)
-            
         f = self.vectorfield
         sol = solve_ivp(f, s_span, qp0, **ivp_opt)
         return sol
 
-    def track(self, particle, return_sol=False):
+    def track(self, particle, return_sol=False, ivp_opt=None):
         if isinstance(particle.x, np.ndarray) or isinstance(particle.x, list):
             results = []
             out = []
             for i in range(len(particle.x)):
                 qp0 = [particle.x[i], particle.y[i], particle.beta0[i] * particle.zeta[i], particle.px[i], particle.py[i], particle.ptau[i]]
-                sol = self.solve(qp0)
+                sol = self.solve(qp0, ivp_opt=ivp_opt)
                 s = sol.t
                 x, y, tau, px, py, ptau = sol.y
                 results.append({
